@@ -45,6 +45,10 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
+    async redirect({ url, baseUrl }) {
+      // Redirect to the /home page after authentication
+      return url.startsWith(baseUrl) ? `${baseUrl}` : url;
+    },
   },
   adapter: PrismaAdapter(db) as Adapter,
   providers: [
