@@ -56,11 +56,114 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+    comment       String? 
     accounts      Account[]
     sessions      Session[]
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     posts         Post[]
+    decides       Decides[]
+    receipts      Receipt[]
+    registers     Registers[]
+}
+
+model Decides {
+    userId  String
+    currencytypeId  String 
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    currencytype         CurrencyType     @relation(fields: [currencytypeId], references: [id])
+    @@unique([userId, currencytypeId])
+}
+
+model CurrencyType {
+    id  String  @id @default(cuid())
+    name    String
+    decides     Decides[]
+    holds       Holds[]
+}
+
+model Receipt {
+    id      String  @id @default(cuid())
+    receiptImage    String?
+    bgImage     String?
+    place       String?
+    date_of_purchase    DateTime @default(now())
+    createdAt   DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    comment String?
+    currencytype    String?
+    userId      String
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    registers     Registers[]
+    needs        Needs[]
+}
+
+model Registers {
+    userId      String 
+    receiptId   String
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    receipt      Receipt     @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+    @@unique([userId, receiptId])
+}
+
+model Item {
+    id      String  @id @default(cuid())
+    name    String?
+    amount_per_piece    Float?
+    no_of_pieces        Int?
+    total_amount        Int?
+    needs        Needs[]
+    allocates      Allocates[]
+    dependson   DependsOn[]
+}
+
+model Needs {
+    receiptId       String
+    itemId          String
+    receipt      Receipt     @relation(fields: [receiptId], references: [id], onDelete: Cascade)
+    item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+    @@unique([receiptId, itemId])
+}
+
+model Category {
+    id      String @id @default(cuid())
+    name    String?
+    allocates      Allocates[]
+}
+
+model Allocates {
+    itemId     String
+    categoryId      String
+    item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+    category      Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+    @@unique([itemId, categoryId])
+}
+
+model ExchangeCurrency {
+    id      String      @id     @default(cuid())
+    rate    Float?
+    defaultType     String?
+    defaultAmount   Int?
+    price   Float?
+    dependson   DependsOn[]
+    holds       Holds[]
+}
+
+model DependsOn {
+    itemId      String
+    exchangecurrencyId  String
+    item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+    exchangecurrency    ExchangeCurrency    @relation(fields: [exchangecurrencyId], references: [id], onDelete: Cascade)
+    @@unique([itemId, exchangecurrencyId])
+}
+
+
+model Holds {
+    currencytypeId      String
+    exchangecurrencyId  String
+    currencytype    CurrencyType    @relation(fields: [currencytypeId], references: [id], onDelete: Cascade)
+    exchangecurrency    ExchangeCurrency    @relation(fields: [exchangecurrencyId], references: [id], onDelete: Cascade)
+    @@unique([currencytypeId, exchangecurrencyId])
 }
 
 model VerificationToken {

@@ -12,6 +12,10 @@ const config = {
             protocol: 'https',
             hostname: 'cdn.discordapp.com', // for discord
           },
+          {
+            protocol: 'https',
+            hostname: 'lh3.googleusercontent.com',
+          },
         ],
       },
 };

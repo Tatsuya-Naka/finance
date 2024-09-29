@@ -1,67 +1,37 @@
-"use client";
 import Image from "next/image";
-import { ReactEventHandler, useState } from "react";
 import { TbSettings } from "react-icons/tb";
-import { IoSunnyOutline } from "react-icons/io5";
-import { LuMoon } from "react-icons/lu";
-import { IoIosMenu } from "react-icons/io";
 import Link from "next/link";
-import SideBar from "./SideBar";
 import { BsSearch } from "react-icons/bs";
+import { getServerAuthSession } from "~/server/auth";
+import Color from "./Color";
+import MenuSide from "./Menu";
+import HeaderIcon from "./HeaderIcon";
 
-type CustomType = {
-    id: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-} | undefined;
+export default async function HeaderComp() {
+    const session = await getServerAuthSession();
 
-interface Props {
-    userData: CustomType;
-};
+    const searchresult = async (formData: FormData) => {
+        "use server";
+        const search = formData.get("searchvalue") as string;
 
-export default function HeaderComp({ userData }: Props) {
-    const [color, setColor] = useState("bright");
-    const [isMenu, setIsMenu] = useState(false);
-    const [search, setSearch] = useState("");
-
-    const handleColor = () => {
-        if (color == "bright") {
-            setColor("dark");
+        try {
+            // writing prisma or any other database query
+            console.log("connecting to database, serach result: ", search);
+        } catch (error) {
+            console.log("Error occured while connecting database: ", error);
         }
-        else if (color == "dark") {
-            setColor("bright");
-        }
-    };
-
-    const handleMenubar = () => {
-        setIsMenu(prev => !prev);
-        if (isMenu) console.log("open ");
-        else console.log("close");
-    };
-
-    const handleSearch = (e: React.FormEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        setSearch(e.currentTarget.value);
-    };
+    }
 
     return (
         <>
-            <nav className="bg-white z-[100 fixed top-0 right-0 left-0 w-full h-[56px] box-border">
+            <nav className="bg-white z-[100] fixed top-0 right-0 left-0 w-full h-[56px] box-border">
                 <div className="max-w-[1380px] flex items-center relative px-[0.5rem] m-auto h-full ">
                     {/* Menu bar & Logo */}
                     <div className="flex items-center gap-3">
                         {/* Menu */}
-                        <div className="inline-block flex">
-                            <button
-                                className="bg-transparent hover:bg-gray-400 text-black h-full w-full hover:text-gray-10/20 p-[0.5rem] rounded-[0.375rem] text-center border-none"
-                                onClick={handleMenubar}
-                            >
-                                <IoIosMenu className="w-full h-full" size={24} />
-                            </button>
-                        </div>
+                        <MenuSide image={session?.user.image} name={session?.user.name} id={session?.user.id}/>
                         <Link
-                            href={userData ? '/' : '/'}
+                            href={session?.user ? '/' : '/'}
                         >
                             <h1 className="text-[1.5rem] font-[700]">
                                 Finance
@@ -73,6 +43,7 @@ export default function HeaderComp({ userData }: Props) {
                     <div className="flex flex-auto mx-[1rem] items-center max-w-[400px]">
                         <form
                             className="block w-full"
+                            action={searchresult}
                         >
                             <div className="md:flex hidden flex-nowrap ">
                                 <div className="relative flex flex-1 flex-col text-[1rem] ">
@@ -81,7 +52,8 @@ export default function HeaderComp({ userData }: Props) {
                                         placeholder="Search..."
                                         type="text"
                                         id="search"
-                                        onChange={handleSearch}
+                                        // onChange={handleSearch}
+                                        name="searchvalue"
                                     />
                                     {/* Search Drop Box */}
 
@@ -90,6 +62,7 @@ export default function HeaderComp({ userData }: Props) {
                                     <button
                                         type="submit"
                                         className="absolute py-0 mt-0 right-auto inset-0 p-[0.5rem] bg-transparent hover:bg-gray-600 text-black hover:text-gray-700 inline-block rounded-l-[0.375rem] text-center "
+                                        formAction={searchresult}
                                     >
                                         <BsSearch size={24} />
                                     </button>
@@ -110,26 +83,17 @@ export default function HeaderComp({ userData }: Props) {
                     {/* Dark mode & Setting & Profile */}
                     <div className="flex items-center h-100 ml-auto">
                         {/* Search Engine */}
-                        <div className="flex md:hidden ">
-                            <Link
-                                href="#"
-                                className="bg-white text-black font-[700] mx-1 p-[0.5rem] inline-block rounded-[0.375rem] w-full hover:text-gray-300 hover:bg-blue-200"
-                            >
+                        <form className="flex md:hidden " action={searchresult}>
+                            <HeaderIcon type="submit">
                                 <BsSearch size={24} />
-                            </Link>
-                        </div>
+                            </HeaderIcon>
+                        </form>
                         {/* Dark Mode */}
                         <span
                             className="..."
                         >
                             <div className="mx-1">
-                                <button
-                                    type="button"
-                                    className="items-center transition-all flex p-1 rounded-full bg-transparent hover:bg:blue-200 text-black hover:text-gray-700 text-center hover:animate-spin"
-                                    onClick={handleColor}
-                                >
-                                    {color == "bright" ? <IoSunnyOutline className="w-full h-full" size={32} /> : <LuMoon className="w-full h-full" size={32} />}
-                                </button>
+                                <Color />
                             </div>
                         </span>
                         {/* Setting */}
@@ -137,44 +101,32 @@ export default function HeaderComp({ userData }: Props) {
                             className="..."
                         >
                             <div className="mx-1">
-                                <button
-                                    type="button"
-                                    className="items-center transition-all flex p-1 rounded-full bg-transparent hover:bg:blue-200 text-black hover:text-gray-700 text-center hover:animate-spin"
-                                >
+                                <HeaderIcon className="hover:animate-spin">
                                     <TbSettings className="w-full h-full" size={32} />
-                                </button>
+                                </HeaderIcon>
                             </div>
                         </span>
                         {/* User Icon */}
-                        {userData &&
+                        {session &&
                             <span
                                 className="..."
                             >
-                                <div className="mx-1">
-                                    <button
-                                        type="button"
-                                        className="items-center transition-all flex p-1 rounded-full bg-transparent hover:bg:blue-200 text-black hover:text-gray-700 text-center"
-                                    >
+                                <div className="mx-1" >
+                                    <HeaderIcon>
                                         <Image
-                                            src={userData.image ?? ""}
-                                            alt={userData.name ?? ""}
+                                            src={session?.user.image ?? ""}
+                                            alt={session?.user.name ?? ""}
                                             height={32}
                                             width={32}
                                             className="w-full  h-full rounded-full"
                                         />
-                                    </button>
+                                    </HeaderIcon>
                                 </div>
                             </span>
                         }
                     </div>
                 </div>
             </nav>
-            {isMenu &&
-                <div>
-                    <SideBar userData={userData} isMenu={isMenu} setIsMenu={setIsMenu} />
-                    <div className="bg-[#090909] opacity-50 fixed inset-0 z-[100]" onClick={() => setIsMenu(false)}/>
-                </div>
-            }
         </>
     );
 };
