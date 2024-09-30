@@ -1,6 +1,12 @@
+"use client";
+import { ButtonHTMLAttributes } from "react";
 import { BsTrash } from "react-icons/bs";
 
-export default async function Items() {
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement>{
+    index: number | undefined;
+};
+
+export default function Items({index, ...props}: Props) {
     return (
         <div className="flex gap-1">
             <div className="grid grid-cols-3 w-full gap-3">
@@ -9,7 +15,8 @@ export default async function Items() {
                         type="text"
                         placeholder="Item Name..."
                         className="rounded-md bg-gray-300 px-[1rem] py-[0.5rem] outline-none"
-                        name="itemname"
+                        // name={`name[${index}]`}
+                        name="name"
                     />
                 </div>
 
@@ -18,6 +25,7 @@ export default async function Items() {
                         type="text"
                         placeholder="Category..."
                         className="rounded-md bg-gray-300 px-[1rem] py-[0.5rem] outline-none"
+                        // name={`category[${index}]`}
                         name="category"
                     />
                 </div>
@@ -28,6 +36,7 @@ export default async function Items() {
                             type="number"
                             placeholder="Amount..."
                             className="rounded-md bg-gray-300 px-[1rem] py-[0.5rem] outline-none"
+                            // name={`amount[${index}]`}
                             name="amount"
                         />
                     </div>
@@ -35,8 +44,10 @@ export default async function Items() {
                     <div className="flex flex-col gap-1">
                         <input
                             type="number"
+                            step="0.01"
                             placeholder="Price..."
                             className="rounded-md bg-gray-300 px-[1rem] py-[0.5rem] outline-none"
+                            // name={`price[${index}]`}
                             name="price"
                         />
                     </div>
@@ -46,6 +57,7 @@ export default async function Items() {
                 <button
                     type="button"
                     className="rounded-full bg-transparent hover:bg-gray-100"
+                    {...props}
                 >
                     <BsTrash />
                 </button>
